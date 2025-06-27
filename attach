@@ -1,0 +1,31 @@
+#!/usr/bin/bash
+
+sessions=$(tmux list-sessions -F '#S' 2>/dev/null)
+current=$(tmux display-message -p '#S')
+
+if [[ -n $TMUX ]]; then
+    sessions=$(echo "$sessions" | grep -vFx "$current")
+fi
+
+if [[ -z "$sessions" ]]; then
+    if [[ -n "$current" ]]; then
+        echo "Already in session '$current'"
+    else
+        echo "No tmux sessions"
+    fi
+    exit 0
+elif [[ "$(echo "$sessions"| wc -l)" -eq 1 ]]; then
+    selected=$sessions
+else
+    selected=$(echo "$sessions" | fzf)
+fi
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+if [[ -z $TMUX ]]; then
+    tmux a -d -t $selected
+else
+    tmux switch-client -t $selected
+fi
