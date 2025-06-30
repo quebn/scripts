@@ -1,14 +1,23 @@
 #!/usr/bin/bash
-
 SESSION_NAME="vpn"
 VPN_CONFIG="/home/quebn/.config/openvpn/config.ovpn"
 
-if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    echo "Session '$SESSION_NAME' already exists. Attaching..."
-    tmux attach -t "$SESSION_NAME"
+if pgrep -x openvpn >/dev/null ; then
+    echo "vpn is already running! in tmux session '$SESSION_NAME'"
+    exit 0
+fi
+
+if  tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    echo "Switching to session '$SESSION_NAME' and starting OpenVPN..."
 else
     echo "Creating new tmux session '$SESSION_NAME' and starting OpenVPN..."
-    tmux new-session -d -s "$SESSION_NAME"
-    tmux send-keys -t "$SESSION_NAME" "sudo openvpn --config \"$VPN_CONFIG\"" C-m
+    tmux new-session -ds "$SESSION_NAME" -c "$HOME"
+fi
+
+tmux send-keys -t "$SESSION_NAME" "sudo openvpn --config \"$VPN_CONFIG\"" C-m
+
+if [[ -n "$TMUX" ]]; then
+    tmux switch-client -t $SESSION_NAME
+else
     tmux attach -t "$SESSION_NAME"
 fi
