@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 sessions=$(tmux list-sessions -F '#S' 2>/dev/null)
-current=$(tmux display-message -p '#S')
+current=$(tmux display-message -p '#S' 2>/dev/null)
 
 if [[ -n $TMUX ]]; then
     sessions=$(echo "$sessions" | grep -vFx "$current")
@@ -24,8 +24,8 @@ if [[ -z $selected ]]; then
     exit 0
 fi
 
-if [[ -z $TMUX ]]; then
-    tmux a -d -t $selected
+if [[ -z "$TMUX" ]]; then
+    tmux a -d -t "$selected"
 else
-    tmux switch-client -t $selected
+    tmux switch-client -t "$selected"
 fi
