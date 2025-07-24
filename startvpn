@@ -1,4 +1,5 @@
-#!/usr/bin/bash
+#!/bin/sh
+
 SESSION_NAME="vpn"
 VPN_CONFIG="/home/quebn/.config/openvpn/config.ovpn"
 

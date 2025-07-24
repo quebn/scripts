@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/sh
 
 sessions=$(tmux list-sessions -F '#S' 2>/dev/null)
 current=$(tmux display-message -p '#S' 2>/dev/null)
