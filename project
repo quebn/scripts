@@ -1,13 +1,13 @@
 #!/bin/sh
 
-project_dir="$HOME/Programming"
+programming_dir="$HOME/Programming"
 
 if [ $# -eq 0 ]; then
     echo "Missing 'project' argument: project [type_dir] [new_project_name]" >&2
     exit 1
 fi
 
-if [ ! -d "$project_dir/$1" ] && [ ! "$1" = "new" ]; then
+if [ ! -d "$programming_dir/$1" ] && [ ! "$1" = "new" ]; then
     echo "Command: '$1' does not exist" >&2
     exit 1
 fi
@@ -18,24 +18,37 @@ if [ $# -eq 1 ]; then
 fi
 
 if [ "$1" = "new" ]; then
-    new_type_dir="$project_dir/$2"
+    new_type_dir="$programming_dir/$2"
     if [ -d "$new_type_dir" ]; then
         echo "Failed to create project type: directory '$2' already exist" >&2
         exit 1
     fi
     mkdir "$new_type_dir"
-    echo "Project type '$2' created successfully in '$project_dir'"
+    echo "Project type '$2' created successfully in '$programming_dir'"
     exit 0
 fi
 
-new_project="$project_dir/$1/$2"
+new_project_dir="$programming_dir/$1/$2"
+project_name="$2"
 
-if [ -d "$new_project" ]; then
-    echo "Failed to new project: project '$2' already exist" >&2
+if [ -d "$new_project_dir" ]; then
+    echo "Failed to new project: project '$project_name' already exist" >&2
     exit 1
 fi
 # TODO: add prompt for creation and add delete option as a 4th arg.
-mkdir "$new_project"
-echo "Project '$2' created successfully in '$project_dir/$1'"
-exit 0
+# echo "Project '$2' created successfully in '$project_dir/$1'"
+mkdir "$new_project_dir"
+if [[ -z $TMUX ]] && [[ -z $(pgrep tmux) ]]; then
+    tmux new-session -s $project_name -c $new_project_dir
+    exit 0
+fi
 
+if ! tmux has-session -t=$project_name 2>/dev/null; then
+    tmux new-session -ds $project_name -c $new_project_dir
+fi
+
+if [[ -z $TMUX ]]; then
+    tmux a -d -t $project_name
+else
+    tmux switch-client -t $project_name
+fi

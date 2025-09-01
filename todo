@@ -2,19 +2,22 @@
 
 dir=$HOME/.todo
 name=todo
+mainfile="main.md"
 
 if [ ! -d "$dir" ]; then
     mkdir "$dir"
-    touch "$dir/main.md"
+    touch "$dir/$mainfile"
 fi
 
 if [[ -z $TMUX ]] && [[ -z $(pgrep tmux) ]]; then
     tmux new-session -s $name -c $dir
+    tmux send-keys -t "$name:" "vi $mainfile" C-m
     exit 0
 fi
 
 if ! tmux has-session -t=$name 2>/dev/null; then
     tmux new-session -ds $name -c $dir
+    tmux send-keys -t "$name:" "vi $mainfile" C-m
 fi
 
 if [[ -z $TMUX ]]; then
